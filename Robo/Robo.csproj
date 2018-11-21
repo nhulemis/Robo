@@ -46,17 +46,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
+    <Compile Include="BL\bl_Robo.cs" />
+    <Compile Include="Common\Constants.cs" />
+    <Compile Include="src\Cell.cs" />
+    <Compile Include="src\Dirty.cs" />
+    <Compile Include="src\Mark.cs" />
+    <Compile Include="src\MatBang.cs" />
+    <Compile Include="src\Obstacle.cs" />
+    <Compile Include="src\Robot.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </EmbeddedResource>
+    <Compile Include="UI\frm_Robo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\frm_Robo.Designer.cs">
+      <DependentUpon>frm_Robo.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -65,7 +70,11 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\frm_Robo.resx">
+      <DependentUpon>frm_Robo.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -78,6 +87,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\dirty1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\empty-flag.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\robo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
