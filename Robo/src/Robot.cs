@@ -21,10 +21,10 @@ namespace Robo.src
             this.ThoiGianNghi = thoiGianNghi;
         }
 
-        public void DrawRobo(Graphics g)
+        public void DrawRobo()
         {
             String path = Application.StartupPath + "\\Resources\\robo.png";
-            Common.Constants.VeIcon(g, path, this.P);
+            Common.Constants.VeIcon(path, this.P);
         }
 
     }

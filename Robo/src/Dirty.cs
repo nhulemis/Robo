@@ -22,7 +22,7 @@ namespace Robo.src
         public void DrawDirty(Graphics g)
         {
            String path = Application.StartupPath + "\\Resources\\dirty1.png";
-           Common.Constants.VeIcon(g,path,this.P);
+           Common.Constants.VeIcon(path,this.P);
         }
     }
 }

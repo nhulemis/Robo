@@ -18,7 +18,7 @@ namespace Robo.Common
         public static String ROBO = "ROBO";
         public static Graphics grs;
 
-        public static void VeIcon(Graphics grs,string path, Point point)
+        public static void VeIcon(string path, Point point)
         {
             WebRequest req = WebRequest.Create(path);
 
@@ -31,9 +31,9 @@ namespace Robo.Common
             grs.DrawImage(img1, p.X + 1, p.Y + 1, Cell.Width - 1, Cell.Height - 1);
         }
 
-        public static void xoaIcon(Graphics g,Point p)
+        public static void xoaIcon(Point p)
         {
-            g.FillRectangle(new SolidBrush(c), p.X + 1, p.Y + 1, Cell.Width - 1, Cell.Height - 1);
+            grs.FillRectangle(new SolidBrush(c), p.X + 1, p.Y + 1, Cell.Width - 1, Cell.Height - 1);
         }
     }
 }

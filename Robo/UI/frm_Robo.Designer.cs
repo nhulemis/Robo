@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.pnlMatBang = new System.Windows.Forms.Panel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.rbt_VetBan = new System.Windows.Forms.RadioButton();
@@ -36,6 +37,8 @@
             this.rbt_NgaiVat = new System.Windows.Forms.RadioButton();
             this.btn_Run = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.timer_Robo_1 = new System.Windows.Forms.Timer(this.components);
+            this.timer_Robo_2 = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -127,6 +130,16 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // timer_Robo_1
+            // 
+            this.timer_Robo_1.Interval = 500;
+            this.timer_Robo_1.Tick += new System.EventHandler(this.timer_Robo_1_Tick);
+            // 
+            // timer_Robo_2
+            // 
+            this.timer_Robo_2.Interval = 500;
+            this.timer_Robo_2.Tick += new System.EventHandler(this.timer_Robo_2_Tick);
+            // 
             // frm_Robo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -155,5 +168,7 @@
         private System.Windows.Forms.RadioButton rbt_NgaiVat;
         private System.Windows.Forms.Button btn_Run;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Timer timer_Robo_1;
+        private System.Windows.Forms.Timer timer_Robo_2;
     }
 }

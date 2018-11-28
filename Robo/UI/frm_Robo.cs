@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -61,7 +62,30 @@ namespace Robo.UI
 
         private void btn_Run_Click(object sender, EventArgs e)
         {
+            switch (bl.UuTien())
+            {
+                case 0:
+                    timer_Robo_1.Enabled = true;
+                    timer_Robo_1.Start();
+                    Thread.Sleep(50);
+                    timer_Robo_2.Enabled = true;
+                    timer_Robo_2.Start();
+                    break;
+                case 1:
+                    timer_Robo_2.Enabled = true;
+                    timer_Robo_2.Start();
+                    Thread.Sleep(50);
+                    timer_Robo_1.Enabled = true;
+                    timer_Robo_1.Start();
+                    break;
+                case -1:
+                    timer_Robo_1.Enabled = true;
+                    timer_Robo_1.Start();
+                    break;
+                default:
 
+                    break;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -69,6 +93,24 @@ namespace Robo.UI
             pnlMatBang.CreateGraphics().Clear(pnlMatBang.BackColor);
             bl = new bl_Robo(pnlMatBang.CreateGraphics());
             bl.DrawMatrix(pnlMatBang.CreateGraphics());
+            timer_Robo_1.Stop();
+            timer_Robo_2.Stop();
+        }
+
+        private void timer_Robo_1_Tick(object sender, EventArgs e)
+        {
+            if (bl.RunNow(0)!=0)
+            {
+                timer_Robo_1.Stop();
+            }
+        }
+
+        private void timer_Robo_2_Tick(object sender, EventArgs e)
+        {
+            if (bl.RunNow(1) != 0)
+            {
+                timer_Robo_2.Stop();
+            }
         }
     }
 }

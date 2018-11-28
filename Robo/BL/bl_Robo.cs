@@ -65,17 +65,19 @@ namespace Robo.BL
                 case 1: // robo
                     if (soRobot == 2) return false; // dừng chương trình có thông báo                  
                     var robo = new Robot(0, X, Y, matrix[X, Y].P, true);
-                    robo.DrawRobo(g);
+                    robo.DrawRobo();
                     robos[soRobot] = robo;
                     soRobot++;
                     matrix[X, Y].IsSoHuu = true;
+                    matrix[X, Y].Loai = Constants.ROBO;
                     listsRepaint.Add(robo);
                     return true;
                 case 2:// dich
                     if (mark != null)
                     {
-                        Constants.xoaIcon(g, mark.P);
+                        Constants.xoaIcon( mark.P);
                     }
+                    VeLaiRobo();
                     thietLapMatBang();
                     matrix[X, Y].Cost = 0;
                     mark = new Mark(X, Y, matrix[X, Y].P, false, 0);
@@ -91,17 +93,30 @@ namespace Robo.BL
                     obstacles.Add(obstacle);
                     matrix[X, Y].Cost = -100;
                     matrix[X, Y].IsSoHuu = true;
+                    matrix[X, Y].Loai = Constants.VAT_CAN;
                     listsRepaint.Add(obstacle);
                     return true;
                 case 4://dirty
                     var dirty = new Dirty(X, Y, matrix[X, Y].P, true);
                     dirty.DrawDirty(g);
                     matrix[X, Y].IsSoHuu = true;
+                    matrix[X, Y].Loai = Constants.DIRTY;
                     listsRepaint.Add(dirty);
                     return true;
             }
 
             return false;
+        }
+
+        private void VeLaiRobo()
+        {
+            foreach (var item in robos)
+            {
+                if (item != null)
+                {
+                    item.DrawRobo();
+                }
+            }
         }
 
         public void DrawMatrix(Graphics g)
@@ -117,6 +132,11 @@ namespace Robo.BL
                 if (item is Obstacle)
                 {
                     matrix[item.X, item.Y].Cost = -100;
+                    matrix[item.X, item.Y].Loai = Constants.VAT_CAN;
+                }
+                if (item is Dirty)
+                {
+                    matrix[item.X, item.Y].Loai = Constants.DIRTY;
                 }
             }
         }
@@ -143,7 +163,7 @@ namespace Robo.BL
                         matrix[X, Y].Cost = values + 1;
                         var e = new Cell(X, Y, po, false, values + 1);
                         Open.Enqueue(e);
-                        mb.GiaTri(e.P, values + 1);
+                       // mb.GiaTri(e.P, values + 1);
 
                     }
                 }
@@ -172,7 +192,174 @@ namespace Robo.BL
         #endregion
 
         #region xử lý robo hoạt động
+        /// <summary>
+        /// yêu cầu robo hoạt động
+        /// </summary>
+        /// <param name="robo">robo thứ ?</param>
+        /// <returns>-1 là dừng lại
+        /// , 0 là tiếp tục</returns>
+        public int RunNow(int robo)
+        {
+            if (Cost(robos[robo].X, robos[robo].Y) == -1)
+            {
+                return -1;
+            }
+            else
+            {
+                if (robos[robo].X == mark.X && robos[robo].Y == mark.Y)
+                    return -1;// dừng chạy khi robo tới đích
+                Cell next = Next(robos[robo].X, robos[robo].Y);
+                if (next != null )
+                {
+                    if ( matrix[next.X, next.Y].IsSoHuu == false)
+                    {
+                        Swap(robo, next);
+                        return 0;
+                    }
+                    else
+                    {
+                        if (matrix[next.X, next.Y].Loai == Constants.DIRTY)
+                        {
+                            Swap(robo, next);
+                            LauDon(robo);
+                            return 0; // tiếp tục vận hành
+                        }
+                        else if (matrix[next.X, next.Y].Loai == Constants.VAT_CAN)
+                        {
+                            return -1;// kiểm tra lại vị trí vật cản này
+                        }
+                        else if (matrix[next.X, next.Y].Loai == Constants.ROBO)
+                        {
+                            int tinHieu;
+                            if (robo == 0)
+                                tinHieu = 1;
+                            else
+                                tinHieu = 0;
+                            // loang lại
+                            thietLapMatBang();
+                            matrix[mark.X, mark.Y].Cost = 0;
+                            matrix[robos[tinHieu].X, robos[tinHieu].Y].Cost = 10000; // không cho vệt loang qua đây
+                            ResetCost();
+                            Loang();
 
+                            if (robos[tinHieu].ThoiGianNghi< matrix[robos[robo].X, robos[robo].Y].Cost*500)
+                            {
+                                return -1; // return chờ
+                            }
+                            else
+                            {
+                                return 1; // chạy đường mới
+                            }
+                        }
+                    }                    
+                }                
+            }
+            return -1;
+        }
+
+        private void LauDon(int robo)
+        {
+            robos[robo].ThoiGianNghi = 3000;
+        }
+
+        /// <summary>
+        /// thay đổi vị trí 
+        /// </summary>
+        /// <param name="robo"></param>
+        /// <param name="next"></param>
+        private void Swap(int robo, Cell next)
+        {
+            matrix[robos[robo].X, robos[robo].Y].IsSoHuu = false;
+            Constants.xoaIcon(robos[robo].P);
+            robos[robo].X = next.X;
+            robos[robo].Y = next.Y;
+            robos[robo].P = next.P;
+            robos[robo].DrawRobo();
+            matrix[robos[robo].X, robos[robo].Y].IsSoHuu = true;
+        }
+
+        /// <summary>
+        /// bước tiếp theo của robo
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        private Cell Next(int x, int y)
+        {
+            //Cell next = new Cell();
+            var cost = matrix[x, y];
+            //if (cost.giaTri == 1000)
+            //{
+
+            //}
+            for (int i = 0; i < 4; i++)
+            {
+                var xx = x + Hx[i];
+                var yy = y + Hy[i];
+                if (Check2(xx, yy))
+                {
+                    if (matrix[xx, yy].Cost < cost.Cost)
+                    {
+                        cost = matrix[xx, yy];
+                    }
+                }
+            }
+
+            return cost;
+        }
+
+        private bool Check2(int x, int y)
+        {
+            if (x < 0 || x > mb.Columns - 1 || y < 0 || y > mb.Rows - 1)
+            {
+                return false;
+            }
+            if (matrix[x, y].Cost == -1)
+            {
+                return false;
+            }
+            if (matrix[x, y].Cost == -100)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// hàm lấy chi phí hiện tại của robo
+        /// </summary>
+        /// <param name="x">tọa độ trục X</param>
+        /// <param name="y">tọa độ trục Y</param>
+        /// <returns></returns>
+        private int Cost(int x, int y)
+        {
+            return matrix[x, y].Cost;
+        }
+
+
+        /// <summary>
+        /// kiểm tra ưu tiên để chạy trước
+        /// </summary>
+        /// <returns>1 robo 1 gần hơn
+        /// , 0 robo 0 gần hơn,
+        /// -1 chỉ có 1 robo
+        /// -2 không có robo nào</returns>
+        public int UuTien()
+        {
+            if (robos[0]!= null && robos[1]!= null)
+            {
+                if (matrix[robos[0].X, robos[0].Y].Cost > matrix[robos[1].X, robos[1].Y].Cost)
+                {
+                    return 1;
+                }
+                else return 0;
+            }
+            else if (robos[0]!=null)
+            {
+                return -1;
+            }
+            return -2;
+        }
 
         #endregion
     }

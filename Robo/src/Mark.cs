@@ -23,7 +23,7 @@ namespace Robo.src
         public void DrawMark(Graphics g)
         {
             String path = Application.StartupPath + "\\Resources\\empty-flag.png";
-            Common.Constants.VeIcon(g, path, this.P);
+            Common.Constants.VeIcon( path, this.P);
         }
     }
 }
