@@ -62,6 +62,7 @@ namespace Robo.UI
 
         private void btn_Run_Click(object sender, EventArgs e)
         {
+            bl.Loang();
             switch (bl.UuTien())
             {
                 case 0:
@@ -95,21 +96,75 @@ namespace Robo.UI
             bl.DrawMatrix(pnlMatBang.CreateGraphics());
             timer_Robo_1.Stop();
             timer_Robo_2.Stop();
+            timer1_LauDon.Stop();
+            timer2_LauDon.Stop();
         }
 
         private void timer_Robo_1_Tick(object sender, EventArgs e)
         {
-            if (bl.RunNow(0)!=0)
+            Console.WriteLine("dang chay 1");
+            var result = bl.RunNow(0);
+            if (result!=0)
             {
                 timer_Robo_1.Stop();
+            }
+            else if (result == 0)
+            {
+                var time = bl.GetTime(0);
+                if (time!=0)
+                {
+                    timer_Robo_1.Stop();
+                    timer1_LauDon.Enabled = true;
+                    timer1_LauDon.Start();
+                }
             }
         }
 
         private void timer_Robo_2_Tick(object sender, EventArgs e)
         {
-            if (bl.RunNow(1) != 0)
+            Console.WriteLine("dang chay 2");
+            var result = bl.RunNow(1);
+            if (result != 0)
             {
                 timer_Robo_2.Stop();
+            }
+            else if (result == 0)
+            {
+                var time = bl.GetTime(1);
+                if (time != 0)
+                {
+                    timer_Robo_2.Stop();
+                    timer2_LauDon.Enabled = true;
+                    timer2_LauDon.Start();
+                }
+            }
+        }
+
+       
+
+        private void timer1_LauDon_Tick(object sender, EventArgs e)
+        {
+            Console.WriteLine("dang chay lau don 1");
+            var result = bl.GetTime(0, 100);
+            if (result == 0)
+            {
+                bl.SetTime(0);
+                timer_Robo_1.Start();
+                timer1_LauDon.Stop();
+                timer1_LauDon.Enabled = false;
+            }
+        }
+
+        private void timer2_LauDon_Tick(object sender, EventArgs e)
+        {
+            Console.WriteLine("dang chay lau don 2");
+            var result = bl.GetTime(1, 100);
+            if (result == 0)
+            {
+                bl.SetTime(1);
+                timer_Robo_2.Start();
+                timer2_LauDon.Stop();
+                timer2_LauDon.Enabled = false;
             }
         }
     }

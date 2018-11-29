@@ -39,6 +39,8 @@
             this.button1 = new System.Windows.Forms.Button();
             this.timer_Robo_1 = new System.Windows.Forms.Timer(this.components);
             this.timer_Robo_2 = new System.Windows.Forms.Timer(this.components);
+            this.timer1_LauDon = new System.Windows.Forms.Timer(this.components);
+            this.timer2_LauDon = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -140,6 +142,14 @@
             this.timer_Robo_2.Interval = 500;
             this.timer_Robo_2.Tick += new System.EventHandler(this.timer_Robo_2_Tick);
             // 
+            // timer1_LauDon
+            // 
+            this.timer1_LauDon.Tick += new System.EventHandler(this.timer1_LauDon_Tick);
+            // 
+            // timer2_LauDon
+            // 
+            this.timer2_LauDon.Tick += new System.EventHandler(this.timer2_LauDon_Tick);
+            // 
             // frm_Robo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -170,5 +180,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Timer timer_Robo_1;
         private System.Windows.Forms.Timer timer_Robo_2;
+        private System.Windows.Forms.Timer timer1_LauDon;
+        private System.Windows.Forms.Timer timer2_LauDon;
     }
 }

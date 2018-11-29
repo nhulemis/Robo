@@ -85,7 +85,7 @@ namespace Robo.BL
                     Open = new Queue<Cell>();
                     Open.Enqueue(mark);
                     ResetCost();
-                    Loang();
+                   // Loang();
                     return true;
                 case 3:// obstacle                    
                     var obstacle = new Obstacle(X, Y, matrix[X, Y].P, true, -100);
@@ -107,6 +107,8 @@ namespace Robo.BL
 
             return false;
         }
+
+       
 
         private void VeLaiRobo()
         {
@@ -221,6 +223,7 @@ namespace Robo.BL
                         if (matrix[next.X, next.Y].Loai == Constants.DIRTY)
                         {
                             Swap(robo, next);
+                            matrix[next.X, next.Y].IsSoHuu = false;
                             LauDon(robo);
                             return 0; // tiếp tục vận hành
                         }
@@ -361,6 +364,21 @@ namespace Robo.BL
             return -2;
         }
 
+
+        public int GetTime(int robo)
+        {
+            return robos[robo].ThoiGianNghi;
+        }
+
+        public int GetTime(int robo,int time)
+        {
+            return robos[robo].ThoiGianNghi-=time;
+        }
+
+        public void SetTime(int robo)
+        {
+            robos[robo].ThoiGianNghi = 0;
+        }
         #endregion
     }
 }
