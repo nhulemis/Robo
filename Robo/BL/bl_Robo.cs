@@ -276,7 +276,11 @@ namespace Robo.BL
                 else
                 {
                     // da bi chang duong boi 1 vat cang moi
-
+                    thietLapMatBang();
+                    matrix[mark.X, mark.Y].Cost = 0;
+                    ResetCost();
+                    Loang();
+                    return 0;
                 }
             }
             return -1;

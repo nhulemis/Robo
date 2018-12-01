@@ -98,8 +98,7 @@ namespace Robo.UI
             timer_Robo_1.Stop();
             timer_Robo_2.Stop();
             timer1_LauDon.Stop();
-            timer2_LauDon.Stop();
-           
+            timer2_LauDon.Stop();           
             bl.setTimeClear(radioButton2, radioButton3);
         }
 
