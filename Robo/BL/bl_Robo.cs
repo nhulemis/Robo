@@ -6,12 +6,14 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Robo.BL
 {
     class bl_Robo
     {
         #region 
+        RadioButton  b, c;
         private Cell cell;
         private MatBang mb;
         private Cell[,] matrix;
@@ -21,7 +23,8 @@ namespace Robo.BL
         int soRobot;
         Mark mark;
         List<Obstacle> obstacles;
-
+        Stack<Cell> oldLocalRobo1;
+        Stack<Cell> oldLocalRobo2;
         private int[] Hx = { 1, 0, -1, 0 };
         private int[] Hy = { 0, 1, 0, -1 };
 
@@ -39,10 +42,19 @@ namespace Robo.BL
             robos = new Robot[2];
             mark = new Mark();
             obstacles = new List<Obstacle>();
+            oldLocalRobo1 = new Stack<Cell>();
+            oldLocalRobo2 = new Stack<Cell>();
         }
 
 
         #region thiết lập và loang
+
+        public void setTimeClear(RadioButton b, RadioButton c)
+        {
+            
+            this.b = b;
+            this.c = c;
+        }
         private void thietLapMatBang()
         {
             for (int i = 0; i < mb.Columns; i++)
@@ -75,7 +87,7 @@ namespace Robo.BL
                 case 2:// dich
                     if (mark != null)
                     {
-                        Constants.xoaIcon( mark.P);
+                        Constants.xoaIcon(mark.P);
                     }
                     VeLaiRobo();
                     thietLapMatBang();
@@ -85,7 +97,7 @@ namespace Robo.BL
                     Open = new Queue<Cell>();
                     Open.Enqueue(mark);
                     ResetCost();
-                   // Loang();
+                    // Loang();
                     return true;
                 case 3:// obstacle                    
                     var obstacle = new Obstacle(X, Y, matrix[X, Y].P, true, -100);
@@ -108,7 +120,7 @@ namespace Robo.BL
             return false;
         }
 
-       
+
 
         private void VeLaiRobo()
         {
@@ -204,26 +216,26 @@ namespace Robo.BL
         {
             if (Cost(robos[robo].X, robos[robo].Y) == -1)
             {
-                return -1;
+                return -1; // không thấy đường đi
             }
             else
             {
                 if (robos[robo].X == mark.X && robos[robo].Y == mark.Y)
                     return -1;// dừng chạy khi robo tới đích
                 Cell next = Next(robos[robo].X, robos[robo].Y);
-                if (next != null )
+                if (next != null)
                 {
-                    if ( matrix[next.X, next.Y].IsSoHuu == false)
+                    if (matrix[next.X, next.Y].IsSoHuu == false)
                     {
                         Swap(robo, next);
-                        return 0;
+                        return 0; // tiếp tục di chuyển
                     }
                     else
                     {
                         if (matrix[next.X, next.Y].Loai == Constants.DIRTY)
                         {
                             Swap(robo, next);
-                            matrix[next.X, next.Y].IsSoHuu = false;
+                            //matrix[next.X, next.Y].IsSoHuu = false;
                             LauDon(robo);
                             return 0; // tiếp tục vận hành
                         }
@@ -238,31 +250,53 @@ namespace Robo.BL
                                 tinHieu = 1;
                             else
                                 tinHieu = 0;
+                            if (matrix[robos[tinHieu].X, robos[tinHieu].Y].Cost == 0)
+                                return -1; // đã có robo khác chiếm vị trí đích
+
                             // loang lại
                             thietLapMatBang();
                             matrix[mark.X, mark.Y].Cost = 0;
                             matrix[robos[tinHieu].X, robos[tinHieu].Y].Cost = 10000; // không cho vệt loang qua đây
                             ResetCost();
                             Loang();
-
-                            if (robos[tinHieu].ThoiGianNghi< matrix[robos[robo].X, robos[robo].Y].Cost*500)
+                            var _newCost = (matrix[robos[robo].X, robos[robo].Y].Cost - robos[robo].oldCost) * 500;
+                            if (robos[tinHieu].ThoiGianNghi < _newCost)
                             {
-                                return -1; // return chờ
+                                Console.WriteLine("chờ robo " + tinHieu);
+                                return robos[tinHieu].ThoiGianNghi + 100; // return chờ
                             }
                             else
                             {
-                                return 1; // chạy đường mới
+                                Console.WriteLine("Đi đường mới");
+                                return 0; // chạy đường mới
                             }
                         }
-                    }                    
-                }                
+                    }
+                }
+                else
+                {
+                    // da bi chang duong boi 1 vat cang moi
+
+                }
             }
             return -1;
         }
 
         private void LauDon(int robo)
-        {
-            robos[robo].ThoiGianNghi = 3000;
+        {            
+            if (b.Checked == true)
+            {
+                robos[robo].ThoiGianNghi = 2500;
+            }
+            if (c.Checked == true)
+            {
+                robos[robo].ThoiGianNghi = 5000;
+            }
+            else
+            {
+                robos[robo].ThoiGianNghi = 2500;
+            }
+           
         }
 
         /// <summary>
@@ -273,12 +307,28 @@ namespace Robo.BL
         private void Swap(int robo, Cell next)
         {
             matrix[robos[robo].X, robos[robo].Y].IsSoHuu = false;
+            matrix[robos[robo].X, robos[robo].Y].Loai = null;
+            if (matrix[robos[robo].X, robos[robo].Y].Cost == 10000)
+            {
+                matrix[robos[robo].X, robos[robo].Y].Cost = robos[robo].oldCost;
+            }
             Constants.xoaIcon(robos[robo].P);
             robos[robo].X = next.X;
             robos[robo].Y = next.Y;
             robos[robo].P = next.P;
+            robos[robo].oldCost = next.Cost;
             robos[robo].DrawRobo();
+            switch (robo)
+            { // lưu lại bước đi trước đó
+                case 0:
+                    oldLocalRobo1.Push(robos[robo]);
+                    break;
+                case 1:
+                    oldLocalRobo2.Push(robos[robo]);
+                    break;
+            }
             matrix[robos[robo].X, robos[robo].Y].IsSoHuu = true;
+            matrix[robos[robo].X, robos[robo].Y].Loai = Constants.ROBO;
         }
 
         /// <summary>
@@ -289,12 +339,8 @@ namespace Robo.BL
         /// <returns></returns>
         private Cell Next(int x, int y)
         {
-            //Cell next = new Cell();
             var cost = matrix[x, y];
-            //if (cost.giaTri == 1000)
-            //{
-
-            //}
+            var temp = cost;
             for (int i = 0; i < 4; i++)
             {
                 var xx = x + Hx[i];
@@ -307,7 +353,10 @@ namespace Robo.BL
                     }
                 }
             }
-
+            if (temp == cost)
+            {
+                return null;
+            }
             return cost;
         }
 
@@ -349,7 +398,7 @@ namespace Robo.BL
         /// -2 không có robo nào</returns>
         public int UuTien()
         {
-            if (robos[0]!= null && robos[1]!= null)
+            if (robos[0] != null && robos[1] != null)
             {
                 if (matrix[robos[0].X, robos[0].Y].Cost > matrix[robos[1].X, robos[1].Y].Cost)
                 {
@@ -357,7 +406,7 @@ namespace Robo.BL
                 }
                 else return 0;
             }
-            else if (robos[0]!=null)
+            else if (robos[0] != null)
             {
                 return -1;
             }
@@ -370,14 +419,19 @@ namespace Robo.BL
             return robos[robo].ThoiGianNghi;
         }
 
-        public int GetTime(int robo,int time)
+        public int GetTime(int robo, int time)
         {
-            return robos[robo].ThoiGianNghi-=time;
+            return robos[robo].ThoiGianNghi -= time;
         }
 
         public void SetTime(int robo)
         {
             robos[robo].ThoiGianNghi = 0;
+        }
+
+        public void SetTime(int robo, int time)
+        {
+            robos[robo].ThoiGianNghi = time;
         }
         #endregion
     }

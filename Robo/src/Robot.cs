@@ -11,7 +11,7 @@ namespace Robo.src
     class Robot : Cell
     {
         public int ThoiGianNghi { get; set; }
-
+        public int oldCost { get; set; }
         public Robot()
         {
 

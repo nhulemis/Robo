@@ -24,6 +24,7 @@ namespace Robo.UI
             bl = new bl_Robo(pnlMatBang.CreateGraphics());
             Common.Constants.c = pnlMatBang.BackColor;
             Common.Constants.grs = pnlMatBang.CreateGraphics();
+            bl.setTimeClear( radioButton2, radioButton3);
         }
 
         private void pnlMatBang_Paint(object sender, PaintEventArgs e)
@@ -98,13 +99,15 @@ namespace Robo.UI
             timer_Robo_2.Stop();
             timer1_LauDon.Stop();
             timer2_LauDon.Stop();
+           
+            bl.setTimeClear(radioButton2, radioButton3);
         }
 
         private void timer_Robo_1_Tick(object sender, EventArgs e)
         {
             Console.WriteLine("dang chay 1");
             var result = bl.RunNow(0);
-            if (result!=0)
+            if (result== -1)
             {
                 timer_Robo_1.Stop();
             }
@@ -118,13 +121,21 @@ namespace Robo.UI
                     timer1_LauDon.Start();
                 }
             }
+            else if (result >=100)
+            {
+
+                timer_Robo_1.Stop();
+                bl.SetTime(0, result);
+                timer1_LauDon.Enabled = true;
+                timer1_LauDon.Start();
+            }
         }
 
         private void timer_Robo_2_Tick(object sender, EventArgs e)
         {
             Console.WriteLine("dang chay 2");
             var result = bl.RunNow(1);
-            if (result != 0)
+            if (result ==-1)
             {
                 timer_Robo_2.Stop();
             }
@@ -137,6 +148,14 @@ namespace Robo.UI
                     timer2_LauDon.Enabled = true;
                     timer2_LauDon.Start();
                 }
+            }
+            else if (result >= 100)
+            {
+
+                timer_Robo_2.Stop();
+                bl.SetTime(1, result);
+                timer2_LauDon.Enabled = true;
+                timer2_LauDon.Start();
             }
         }
 
@@ -166,6 +185,21 @@ namespace Robo.UI
                 timer2_LauDon.Stop();
                 timer2_LauDon.Enabled = false;
             }
+        }
+
+        private void radioButton1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButton2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButton3_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

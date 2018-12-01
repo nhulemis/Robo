@@ -41,7 +41,11 @@
             this.timer_Robo_2 = new System.Windows.Forms.Timer(this.components);
             this.timer1_LauDon = new System.Windows.Forms.Timer(this.components);
             this.timer2_LauDon = new System.Windows.Forms.Timer(this.components);
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.panel1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlMatBang
@@ -61,7 +65,7 @@
             this.panel1.Controls.Add(this.rbt_Dich);
             this.panel1.Controls.Add(this.rbt_NgaiVat);
             this.panel1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.panel1.Location = new System.Drawing.Point(646, 324);
+            this.panel1.Location = new System.Drawing.Point(568, 190);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(123, 182);
             this.panel1.TabIndex = 5;
@@ -113,7 +117,7 @@
             // btn_Run
             // 
             this.btn_Run.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_Run.Location = new System.Drawing.Point(646, 287);
+            this.btn_Run.Location = new System.Drawing.Point(568, 153);
             this.btn_Run.Name = "btn_Run";
             this.btn_Run.Size = new System.Drawing.Size(123, 31);
             this.btn_Run.TabIndex = 4;
@@ -150,11 +154,48 @@
             // 
             this.timer2_LauDon.Tick += new System.EventHandler(this.timer2_LauDon_Tick);
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.radioButton3);
+            this.groupBox1.Controls.Add(this.radioButton2);
+            this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox1.Location = new System.Drawing.Point(742, 207);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(188, 106);
+            this.groupBox1.TabIndex = 7;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "thời gian lau dọn";
+            // 
+            // radioButton2
+            // 
+            this.radioButton2.AutoSize = true;
+            this.radioButton2.Location = new System.Drawing.Point(20, 24);
+            this.radioButton2.Name = "radioButton2";
+            this.radioButton2.Size = new System.Drawing.Size(142, 24);
+            this.radioButton2.TabIndex = 0;
+            this.radioButton2.TabStop = true;
+            this.radioButton2.Text = "Quét (2500ms)";
+            this.radioButton2.UseVisualStyleBackColor = true;
+            this.radioButton2.Click += new System.EventHandler(this.radioButton2_Click);
+            // 
+            // radioButton3
+            // 
+            this.radioButton3.AutoSize = true;
+            this.radioButton3.Location = new System.Drawing.Point(20, 66);
+            this.radioButton3.Name = "radioButton3";
+            this.radioButton3.Size = new System.Drawing.Size(153, 24);
+            this.radioButton3.TabIndex = 0;
+            this.radioButton3.TabStop = true;
+            this.radioButton3.Text = "Lau Kỹ(5000ms)";
+            this.radioButton3.UseVisualStyleBackColor = true;
+            this.radioButton3.Click += new System.EventHandler(this.radioButton3_Click);
+            // 
             // frm_Robo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(942, 550);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.btn_Run);
@@ -164,6 +205,8 @@
             this.Load += new System.EventHandler(this.frm_Robo_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -182,5 +225,8 @@
         private System.Windows.Forms.Timer timer_Robo_2;
         private System.Windows.Forms.Timer timer1_LauDon;
         private System.Windows.Forms.Timer timer2_LauDon;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RadioButton radioButton3;
+        private System.Windows.Forms.RadioButton radioButton2;
     }
 }
