@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,15 +16,27 @@ namespace Robo.BL
     {
         private Cell[,] matrix;
         private Common.Common m_com;
+        private List<RoboCleanHouse> m_listRobo;
+        private static bl_CleanHouse s_clean;
 
 
+
+        public static bl_CleanHouse GetInstance()
+        {
+            if (s_clean == null)
+            {
+                s_clean = new bl_CleanHouse();
+            }
+            return s_clean;
+        }
         //--------------------------------------------------------------
-        public bl_CleanHouse()
+        private bl_CleanHouse()
         {
             m_com = Common.Common.GetInstance();
             m_com.InitMatrix();
             matrix = m_com.matrix;
             SetupMatrix();
+            m_listRobo = new List<RoboCleanHouse>();
         }
 
         private void SetupMatrix()
@@ -35,6 +48,30 @@ namespace Robo.BL
                     matrix[i, j] = new Cell(i, j, new Point(i * m_com.Width, j * m_com.Height), false, -1);
                 }
             }
+        }
+        int i = 0;
+        public void AddRobot(RoboCleanHouse rb)
+        {
+            m_listRobo.Add(rb);
+            new Thread(new ThreadStart(rb.Operate)).Start();
+        }
+
+        public List<RoboCleanHouse> GetListRobo()
+        {
+            return m_listRobo;
+        }
+
+        public Cell[,] MappingMap(Cell[,] cell ,int x, int y)
+        {
+            foreach (var item in m_listRobo)
+            {
+                if (item.GetY() != y && item.GetX() != x)
+                {
+                    cell[item.GetX(), item.GetY()].IsSoHuu = true;
+                    cell[item.GetX(), item.GetY()].Loai = Constants.ROBO;
+                }
+            }
+            return cell;
         }
 
         public void SetupCoordinates(int v, int Mx, int My)

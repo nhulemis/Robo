@@ -14,6 +14,7 @@ namespace Robo.Common
     class Common
     {
         private static Common s_common;
+        private Stack<Cell> m_dirtys;
         private Graphics m_grs;
         private Color m_color;
         public Cell[,] matrix;
@@ -28,6 +29,21 @@ namespace Robo.Common
         private Common()
         {
           
+        }
+
+        public void PushDirty(Cell c)
+        {
+            m_dirtys.Push(c);
+        }
+
+        public Cell PeekDirty()
+        {
+           return m_dirtys.Peek();
+        }
+
+        public void PopDirty()
+        {
+            m_dirtys.Pop();
         }
 
         public static Common GetInstance()

@@ -32,7 +32,7 @@ namespace Robo.UI
             _com.Height = pnl_display.Height / Common.Common.GetInstance().ROWS;
 
             _com.DrawMatrix();
-            bl = new bl_CleanHouse();
+            bl = bl_CleanHouse.GetInstance() ;
         }
 
         private void pnl_display_Paint(object sender, PaintEventArgs e)
@@ -73,7 +73,9 @@ namespace Robo.UI
         {
             if (rbt_Robo.Checked)
             {
+                
                 RoboCleanHouse robo = new RoboCleanHouse(e.X / Common.Common.GetInstance().Width, e.Y / Common.Common.GetInstance().Height);
+                bl.AddRobot(robo);
             }
             else if(rbt_VetBan.Checked)
             {
