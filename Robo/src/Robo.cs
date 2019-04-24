@@ -191,7 +191,7 @@ namespace Robo.src
             }
             var next = m_pathPlanning.Pop();
             //m_com.DeleteIcon(m_position);
-            m_grs.FillRectangle(new SolidBrush(m_color), m_x + 1, m_y + 1, m_com.Width - 1, m_com.Height - 1);
+            m_grs.FillRectangle(new SolidBrush(m_color), m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
             m_position = next.P;
             m_x = next.X;
             m_y = next.Y;
