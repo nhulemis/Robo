@@ -24,7 +24,7 @@ namespace Robo.src
         public void DrawRobo()
         {
             String path = Application.StartupPath + "\\Resources\\robo.png";
-            Common.Constants.VeIcon(path, this.P);
+            Common.Constants.VeIcon( path , P );
         }
 
     }

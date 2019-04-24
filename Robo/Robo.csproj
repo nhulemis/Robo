@@ -54,6 +54,7 @@
     <Compile Include="src\MatBang.cs" />
     <Compile Include="src\Model.cs" />
     <Compile Include="src\Obstacle.cs" />
+    <Compile Include="src\Robo.cs" />
     <Compile Include="src\Robot.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

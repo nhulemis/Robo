@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace Robo.src
 {
@@ -7,7 +8,11 @@ namespace Robo.src
     {
         protected bool                  m_isBusy;
         List<Cell>                      m_pathPlanning;
+
+
+
         public abstract void OnUpdate();
+        public abstract void OnRender(Graphics grs);
         public abstract void OnInit();
 
     }
