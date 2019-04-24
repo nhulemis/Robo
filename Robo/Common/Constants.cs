@@ -1,4 +1,5 @@
-﻿using Robo.src;
+﻿
+using Robo.src;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,12 +11,15 @@ using System.Threading.Tasks;
 
 namespace Robo.Common
 {
+
     class Constants
     {
         public static Color c;
         public static String VAT_CAN = "VAT_CAN";
         public static String DIRTY = "DIRTY";
         public static String ROBO = "ROBO";
+        
+        private static Common m_common = Common.GetInstance();
         public static Graphics grs;
 
         public static void VeIcon(string path, Point point)
@@ -28,12 +32,12 @@ namespace Robo.Common
 
             Image img1 = Image.FromStream(imgStream);
             var p = point;
-            grs.DrawImage(img1, p.X + 1, p.Y + 1, Cell.Width - 1, Cell.Height - 1);
+            m_common.GetGraphics().DrawImage(img1, p.X + 1, p.Y + 1, Cell.Width - 1, Cell.Height - 1);
         }
 
         public static void xoaIcon(Point p)
         {
-            grs.FillRectangle(new SolidBrush(c), p.X + 1, p.Y + 1, Cell.Width - 1, Cell.Height - 1);
+            m_common.GetGraphics().FillRectangle(new SolidBrush(m_common.GetColor()), p.X + 1, p.Y + 1, Cell.Width - 1, Cell.Height - 1);
         }
     }
 }

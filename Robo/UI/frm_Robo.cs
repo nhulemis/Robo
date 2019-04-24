@@ -22,8 +22,7 @@ namespace Robo.UI
         private void frm_Robo_Load(object sender, EventArgs e)
         {
             bl = new bl_Robo(pnlMatBang.CreateGraphics());
-            Common.Constants.c = pnlMatBang.BackColor;
-            Common.Constants.grs = pnlMatBang.CreateGraphics();
+            Common.Common.GetInstance().SetGraphics(pnlMatBang.CreateGraphics(), pnlMatBang.BackColor);
             bl.setTimeClear( radioButton2, radioButton3);
         }
 
