@@ -16,6 +16,7 @@ namespace Robo.Common
     {
         public static Color c;
         public static String VAT_CAN = "VAT_CAN";
+        public static int COST_VAT_CAN = -100;
         public static String DIRTY = "DIRTY";
         public static String ROBO = "ROBO";
         

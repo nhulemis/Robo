@@ -81,7 +81,7 @@ namespace Robo.BL
                     robos[soRobot] = robo;
                     soRobot++;
                     matrix[X, Y].IsSoHuu = true;
-                    matrix[X, Y].Loai = Constants.ROBO;
+                    matrix[X, Y].Kind = Constants.ROBO;
                     listsRepaint.Add(robo);
                     return true;
                 case 2:// dich
@@ -105,14 +105,14 @@ namespace Robo.BL
                     obstacles.Add(obstacle);
                     matrix[X, Y].Cost = -100;
                     matrix[X, Y].IsSoHuu = true;
-                    matrix[X, Y].Loai = Constants.VAT_CAN;
+                    matrix[X, Y].Kind = Constants.VAT_CAN;
                     listsRepaint.Add(obstacle);
                     return true;
                 case 4://dirty
                     var dirty = new Dirty(X, Y, matrix[X, Y].P, true);
                     dirty.DrawDirty(g);
                     matrix[X, Y].IsSoHuu = true;
-                    matrix[X, Y].Loai = Constants.DIRTY;
+                    matrix[X, Y].Kind = Constants.DIRTY;
                     listsRepaint.Add(dirty);
                     return true;
             }
@@ -146,11 +146,11 @@ namespace Robo.BL
                 if (item is Obstacle)
                 {
                     matrix[item.X, item.Y].Cost = -100;
-                    matrix[item.X, item.Y].Loai = Constants.VAT_CAN;
+                    matrix[item.X, item.Y].Kind = Constants.VAT_CAN;
                 }
                 if (item is Dirty)
                 {
-                    matrix[item.X, item.Y].Loai = Constants.DIRTY;
+                    matrix[item.X, item.Y].Kind = Constants.DIRTY;
                 }
             }
         }
@@ -197,7 +197,7 @@ namespace Robo.BL
             {
                 return false;
             }
-            if (matrix[x, y].Cost == -100 || matrix[x, y].Loai == Constants.VAT_CAN)
+            if (matrix[x, y].Cost == -100 || matrix[x, y].Kind == Constants.VAT_CAN)
             {
                 return false;
             }
@@ -232,18 +232,18 @@ namespace Robo.BL
                     }
                     else
                     {
-                        if (matrix[next.X, next.Y].Loai == Constants.DIRTY)
+                        if (matrix[next.X, next.Y].Kind == Constants.DIRTY)
                         {
                             Swap(robo, next);
                             //matrix[next.X, next.Y].IsSoHuu = false;
                             LauDon(robo);
                             return 0; // tiếp tục vận hành
                         }
-                        else if (matrix[next.X, next.Y].Loai == Constants.VAT_CAN)
+                        else if (matrix[next.X, next.Y].Kind == Constants.VAT_CAN)
                         {
                             return -1;// kiểm tra lại vị trí vật cản này
                         }
-                        else if (matrix[next.X, next.Y].Loai == Constants.ROBO)
+                        else if (matrix[next.X, next.Y].Kind == Constants.ROBO)
                         {
                             int tinHieu;
                             if (robo == 0)
@@ -311,7 +311,7 @@ namespace Robo.BL
         private void Swap(int robo, Cell next)
         {
             matrix[robos[robo].X, robos[robo].Y].IsSoHuu = false;
-            matrix[robos[robo].X, robos[robo].Y].Loai = null;
+            matrix[robos[robo].X, robos[robo].Y].Kind = null;
             if (matrix[robos[robo].X, robos[robo].Y].Cost == 10000)
             {
                 matrix[robos[robo].X, robos[robo].Y].Cost = robos[robo].oldCost;
@@ -332,7 +332,7 @@ namespace Robo.BL
                     break;
             }
             matrix[robos[robo].X, robos[robo].Y].IsSoHuu = true;
-            matrix[robos[robo].X, robos[robo].Y].Loai = Constants.ROBO;
+            matrix[robos[robo].X, robos[robo].Y].Kind = Constants.ROBO;
         }
 
         /// <summary>

@@ -12,40 +12,45 @@ namespace Robo.src
 {
     class RoboCleanHouse
     {
-        private   int m_x;
-        private   int m_y;
-        private   Point m_position;
-        private   Image m_imgRobot;
+        private int m_x;
+        private int m_Witdh;
+        private int m_Height;
+        private int m_y;
+        private Point m_position;
+        private Image m_imgRobot;
         //private   Thread m_thread;
-        private   Stack<Cell> m_pathPlanning;
-        private   Queue<Cell> m_Open;
-        private   Queue<Cell> m_dirtys;
+        private Stack<Cell> m_pathPlanning;
+        private Queue<Cell> m_Open;
+        private Queue<Cell> m_dirtys;
+        public int Tag { get; set; }
+        private Cell[,] m_map;
+        private bool m_isModified;
+        private bool m_isBusy;
+        private Common.Common m_com;
+        private int m_timesSwap;
+        private int m_totalTimes;
+        private int[] Hx = { 1, 0, -1, 0 };
+        private int[] Hy = { 0, 1, 0, -1 };
+        private bool m_isStop;
 
-        private   Cell[,] m_map;
-        private   bool m_isModified;
-        private   bool m_isBusy;
-        private   Common.Common m_com;
-        private   int m_timesSwap;
-        private   int m_totalTimes;
-        private   int[] Hx = { 1, 0, -1, 0 };
-        private   int[] Hy = { 0, 1, 0, -1 };
-        private   bool m_isStop;
+        private Thread m_thread;
 
         private Color m_color;
         private Graphics m_grs;
+        private Brush m_soliColor;
 
 
-        
+
 
         //--------------------------------------------------------------
         public RoboCleanHouse()
         {
-           // m_thread = new Thread(Operate);
+            // m_thread = new Thread(Operate);
         }
 
-        public RoboCleanHouse(int x, int y)
+        public RoboCleanHouse(int x, int y, Graphics grs, Color color)
         {
-           // m_thread = new Thread(Operate);
+            // m_thread = new Thread(Operate);
             m_com = Common.Common.GetInstance();
             m_x = x;
             m_y = y;
@@ -57,41 +62,61 @@ namespace Robo.src
             WebResponse res = req.GetResponse();
             Stream imgStream = res.GetResponseStream();
             m_imgRobot = Image.FromStream(imgStream);
-            m_timesSwap = 5;
+            m_timesSwap = 3;
             m_isBusy = false;
             m_isStop = false;
-            m_color = m_com.GetColor();
-            m_grs = m_com.GetGraphics();
+            m_color = color;
+            m_grs = grs;
+            m_soliColor = new SolidBrush(m_color);
+            m_thread = new Thread(new ThreadStart(Operate));
+            m_pathPlanning = new Stack<Cell>();
             OnInit();
+            m_thread.Start();
         }
 
         //---------------------------------------------------------------
-        private   void OnUpdate()
+        private void OnUpdate()
         {
-            m_totalTimes++;
-            if (!m_isBusy)
+            if (m_dirtys.Count != 0)
             {
-                m_isBusy = true;
-                MappingMap();
-                Spill();
-                SchedulePathPlanning();
-            }
-            else
-            {
-                if (m_totalTimes % m_timesSwap == 0)
+                m_totalTimes++;
+                if (!m_isBusy)
                 {
-                    Swap();
+                    m_isBusy = true;
+                    //MappingMap();
+                    Spill();
+                    SchedulePathPlanning();
+                }
+                else
+                {
+                    if (m_totalTimes % m_timesSwap == 0)
+                    {
+                        Swap();
+                    }
                 }
             }
         }
 
-        private   void SchedulePathPlanning()
+        private void RescanMap()
         {
-       
+            // m_com.DrawMatrix();
+            // m_grs.DrawImage(m_imgRobot, m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
+            SetupMatrix();
+            MappingMap();
+            m_map[m_x, m_y].Cost = 0;
+            // m_isBusy = false;
+        }
+
+        private void SchedulePathPlanning()
+        {
+            if (m_dirtys.Count == 0)
+            {
+                return;
+            }
             var tem = m_dirtys.Peek();
             while (true)
             {
-                if (tem.Cost == 0)
+                if (m_map[tem.X, tem.Y].Cost == 0)
                 {
                     break;
                 }
@@ -99,9 +124,9 @@ namespace Robo.src
                 {
                     var X = tem.X + Hx[i];
                     var Y = tem.Y + Hy[i];
-                    if (Check(1,X, Y))
+                    if (Check(1, X, Y))
                     {
-                        if (m_map[X, Y].Cost < tem.Cost)
+                        if (m_map[X, Y].Cost < m_map[tem.X, tem.Y].Cost)
                         {
                             m_pathPlanning.Push(tem);
                             tem = m_map[X, Y];
@@ -109,28 +134,19 @@ namespace Robo.src
                     }
                 }
             }
-           
         }
 
-        private   void MappingMap()
+        private void MappingMap()
         {
-            var matrix = m_com.matrix;
-            foreach (var item in matrix)
-            {
-                if (item.Loai == Constants.ROBO || item.Loai == Constants.VAT_CAN ||item.Loai == Constants.DIRTY )
-                {
-                    m_map[item.X, item.Y].IsSoHuu = item.IsSoHuu;
-                    m_map[item.X, item.Y].Loai = item.Loai;
-                   // m_map[item.X, item.Y].Cost = item.Cost;
-                }
-            }
-
-            m_com.matrix[m_x, m_y].Loai = Constants.ROBO;
-            m_com.matrix[m_x, m_y].IsSoHuu = true;
+            m_map = BL.bl_CleanHouse.GetInstance().MappingMap(m_map, m_x, m_y);
         }
 
-        private   void Spill()
+        private void Spill()
         {
+
+            RescanMap();
+            m_Open.Enqueue(m_map[m_x, m_y]);
+
             while (m_Open.Count != 0)
             {
                 var _fist = m_Open.Peek();
@@ -140,26 +156,28 @@ namespace Robo.src
                     var Y = _fist.Y + Hy[ii];
 
                     var values = _fist.Cost;
-                    if (Check(0,X, Y))
+                    if (Check(0, X, Y))
                     {
-                        if (m_map[X, Y].Loai == Constants.DIRTY)
-                        {
-                            m_dirtys.Enqueue(m_map[X, Y]);
-                        }
+
                         var po = m_map[X, Y].P;
                         m_map[X, Y].Cost = values + 1;
                         var e = new Cell(X, Y, po, false, values + 1);
                         m_Open.Enqueue(e);
-                        // m_com.GiaTri(e.P, values + 1);
+                        //DrawValue(e.P, values + 1);
 
+                        if (m_map[X, Y].Kind == Constants.DIRTY)
+                        {
+                            m_dirtys.Enqueue(m_map[X, Y]);
+                            break;
+                        }
                     }
                 }
                 m_Open.Dequeue();
             }
-            m_Open.Enqueue(m_map[m_x, m_y]);
+            //
         }
 
-        private   bool Check(int type, int x, int y)
+        private bool Check(int type, int x, int y)
         {
             if (x < 0 || x > m_com.COLUMNS - 1 || y < 0 || y > m_com.ROWS - 1)
             {
@@ -169,33 +187,59 @@ namespace Robo.src
             {
                 return false;
             }
-            if (m_map[x, y].Cost == -100 || m_map[x, y].Loai == Constants.VAT_CAN)
+            if (m_map[x, y].Cost == -100 || m_map[x, y].Kind == Constants.VAT_CAN)
             {
                 return false;
             }
-            if (m_map[x,y].IsSoHuu)
+            if (m_map[x, y].IsSoHuu && type == 1)
             {
                 return false;
             }
             return true;
         }
 
-        public   void Swap()
+        public void Swap()
         {
+            if (m_dirtys.Count == 0)
+            {
+                return;
+            }
+
             var dirty = m_dirtys.Peek();
             if (dirty.X == m_x && dirty.Y == m_y)
             {
                 m_dirtys.Dequeue();
-                m_isStop = true;
+                m_isBusy = false;
+                return;
+            }
+
+            if (m_pathPlanning.Count == 0)
+            {
                 return;
             }
             var next = m_pathPlanning.Pop();
-            //m_com.DeleteIcon(m_position);
-            m_grs.FillRectangle(new SolidBrush(m_color), m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
+            if (!BL.bl_CleanHouse.GetInstance().IsNonCollision(next.X, next.Y, Tag))
+            {
+                BL.bl_CleanHouse.GetInstance().ReScanDirty(m_dirtys.Peek());
+                Thread.Sleep(500);
+                m_dirtys.Clear();
+                m_isBusy = false;
+                return;
+            }
+            m_grs.FillRectangle(m_soliColor, m_position.X + 1, m_position.Y + 1, m_Witdh - 1, m_Height - 1);
             m_position = next.P;
             m_x = next.X;
             m_y = next.Y;
             m_isModified = true;
+        }
+
+        private void DrawValue(Point p, int val)
+        {
+            String text = "" + val;
+            Font drawFornt = new Font("Arial", 14);
+            SolidBrush drawSb = new SolidBrush(Color.Red);
+            StringFormat stringFormat = new StringFormat();
+            m_grs.DrawString(text, drawFornt, drawSb, p);
         }
 
         private void SetupMatrix()
@@ -211,19 +255,16 @@ namespace Robo.src
 
         public void OnInit()
         {
-
             m_map = new Cell[m_com.COLUMNS, m_com.ROWS];
-            m_pathPlanning = new Stack<Cell>();
             m_Open = new Queue<Cell>();
             m_dirtys = new Queue<Cell>();
             SetupMatrix();
+            //m_isModified = true;
             m_map[m_x, m_y].Cost = 0;
             m_Open.Enqueue(m_map[m_x, m_y]);
-
-           // m_com.DeleteIcon(m_position);
             m_grs.DrawImage(m_imgRobot, m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
-
-          //  m_thread.Start();
+            m_Witdh = m_com.Width;
+            m_Height = m_com.Height;
 
         }
 
@@ -232,9 +273,19 @@ namespace Robo.src
             if (m_isModified)
             {
                 grs.DrawImage(m_imgRobot, m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
+                //  DrawValue(m_position, Tag + 1);
                 m_isModified = false;
             }
 
+        }
+
+        public void OnResume()
+        {
+            //m_thread.Abort();
+            if (!m_thread.IsAlive)
+            {
+                m_thread.Start();
+            }
         }
 
         //-------------------------------------------------------
@@ -263,6 +314,18 @@ namespace Robo.src
             m_position = p;
         }
 
+        public bool IsBusy()
+        {
+            return m_isBusy;
+        }
+
+        public void SetDirty(Cell dir)
+        {
+            m_dirtys.Enqueue(dir);
+            m_totalTimes = 0;
+            BL.bl_CleanHouse.GetInstance().CleanDirty();
+        }
+
         public Point GetPoint()
         {
             return m_position;
@@ -270,12 +333,14 @@ namespace Robo.src
 
         public void Operate()
         {
-            while (!m_isStop)
+            while (true)
             {
                 OnUpdate();
                 OnRender(m_grs);
-                Thread.Sleep(100);
+                // Console.WriteLine("robo Dang chay");
+                Thread.Sleep(70);
             }
+
         }
 
     }

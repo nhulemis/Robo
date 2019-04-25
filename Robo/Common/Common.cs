@@ -18,7 +18,6 @@ namespace Robo.Common
         private Graphics m_grs;
         private Color m_color;
         public Cell[,] matrix;
-
         public int COLUMNS;
         public int ROWS;
 
@@ -28,7 +27,7 @@ namespace Robo.Common
 
         private Common()
         {
-          
+            
         }
 
         public void PushDirty(Cell c)
@@ -122,14 +121,11 @@ namespace Robo.Common
         public void RenderIcon(string path, Point point)
         {
             WebRequest req = WebRequest.Create(path);
-
             WebResponse res = req.GetResponse();
-
             Stream imgStream = res.GetResponseStream();
-
-            Image img1 = Image.FromStream(imgStream);
+            Image _img = Image.FromStream(imgStream);
             var p = point;
-            m_grs.DrawImage(img1, p.X + 1, p.Y + 1, Width - 1, Height - 1);
+            m_grs.DrawImage(_img, p.X + 1, p.Y + 1, Width - 1, Height - 1);
         }
 
     }

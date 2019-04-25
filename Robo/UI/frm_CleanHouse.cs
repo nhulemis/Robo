@@ -6,8 +6,8 @@ using Robo.src;
 
 namespace Robo.UI
 {
- 
-    
+
+
     public partial class frm_CleanHouse : Form
     {
         private bl_CleanHouse bl;
@@ -16,23 +16,25 @@ namespace Robo.UI
         public frm_CleanHouse()
         {
             InitializeComponent();
-           
+
         }
 
         private void frm_CleanHouse_Load(object sender, EventArgs e)
         {
             /// 925 x 650
             /// 
+            txt_rows.Text = "20";
+            txt_columns.Text = "20";
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             Common.Common _com = Common.Common.GetInstance();
             _com.SetGraphics(pnl_display.CreateGraphics(), pnl_display.BackColor);
-            _com.COLUMNS = 20;
-            _com.ROWS = 20;
+            _com.COLUMNS = Int32.Parse(txt_columns.Text);
+            _com.ROWS = Int32.Parse(txt_rows.Text);
             _com.Width = pnl_display.Width / Common.Common.GetInstance().COLUMNS;
             _com.Height = pnl_display.Height / Common.Common.GetInstance().ROWS;
 
             _com.DrawMatrix();
-            bl = bl_CleanHouse.GetInstance() ;
+            bl = bl_CleanHouse.GetInstance();
         }
 
         private void pnl_display_Paint(object sender, PaintEventArgs e)
@@ -64,6 +66,7 @@ namespace Robo.UI
                 Common.Common.GetInstance().Width = pnl_display.Width / Common.Common.GetInstance().COLUMNS;
                 Common.Common.GetInstance().Height = pnl_display.Height / Common.Common.GetInstance().ROWS;
             }
+            bl.ResizeMap();
             Common.Common.GetInstance().DrawMatrix();
         }
 
@@ -73,11 +76,15 @@ namespace Robo.UI
         {
             if (rbt_Robo.Checked)
             {
-                
-                RoboCleanHouse robo = new RoboCleanHouse(e.X / Common.Common.GetInstance().Width, e.Y / Common.Common.GetInstance().Height);
+
+                RoboCleanHouse robo = new RoboCleanHouse(
+                    e.X / Common.Common.GetInstance().Width,
+                    e.Y / Common.Common.GetInstance().Height,
+                    pnl_display.CreateGraphics(), pnl_display.BackColor
+                    );
                 bl.AddRobot(robo);
             }
-            else if(rbt_VetBan.Checked)
+            else if (rbt_VetBan.Checked)
             {
                 bl.SetupCoordinates(4, e.X, e.Y);
             }
@@ -85,6 +92,7 @@ namespace Robo.UI
             {
                 bl.SetupCoordinates(3, e.X, e.Y);
             }
+            bl.OnResume();
         }
     }
 }
