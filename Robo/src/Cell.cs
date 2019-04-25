@@ -15,7 +15,10 @@ namespace Robo.src
 
         public int X { get; set; }
         public int Y { get; set; }
+        public int Tag { get; set; }
+
         public bool HasRoboCleaning { get; set; }
+        public int RoboCleaning { get; set; }
 
         public Point P { get; set; }
 

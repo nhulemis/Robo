@@ -35,6 +35,7 @@ namespace Robo.UI
 
             _com.DrawMatrix();
             bl = bl_CleanHouse.GetInstance();
+            bl.SetEnviroment(_com.Width, _com.Height, pnl_display.BackColor,pnl_display.CreateGraphics());
         }
 
         private void pnl_display_Paint(object sender, PaintEventArgs e)
@@ -67,6 +68,10 @@ namespace Robo.UI
                 Common.Common.GetInstance().Height = pnl_display.Height / Common.Common.GetInstance().ROWS;
             }
             bl.ResizeMap();
+            bl.SetEnviroment(Common.Common.GetInstance().Width,
+                Common.Common.GetInstance().Height,
+                pnl_display.BackColor,
+                pnl_display.CreateGraphics());
             Common.Common.GetInstance().DrawMatrix();
         }
 
