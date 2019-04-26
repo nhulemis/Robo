@@ -94,7 +94,14 @@ namespace Robo.Common
 
         public void DeleteIcon(Point p)
         {
-            m_grs.FillRectangle(new SolidBrush(m_color), p.X + 1, p.Y + 1, Width - 1, Height - 1);
+            try
+            {
+                m_grs.FillRectangle(new SolidBrush(m_color), p.X + 1, p.Y + 1, Width - 1, Height - 1);
+            }
+            catch (Exception)
+            {
+                BL.bl_CleanHouse.GetInstance().DeleteIcon(p);
+            }
             
         }
 
@@ -125,7 +132,14 @@ namespace Robo.Common
             Stream imgStream = res.GetResponseStream();
             Image _img = Image.FromStream(imgStream);
             var p = point;
-            m_grs.DrawImage(_img, p.X + 1, p.Y + 1, Width - 1, Height - 1);
+            try
+            {
+                m_grs.DrawImage(_img, p.X + 1, p.Y + 1, Width - 1, Height - 1);
+            }
+            catch (Exception)
+            {
+                BL.bl_CleanHouse.GetInstance().RenderIcon(path, point);
+            }
         }
 
     }

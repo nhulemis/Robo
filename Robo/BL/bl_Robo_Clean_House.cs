@@ -23,8 +23,10 @@ namespace Robo.BL
         private List<Cell> m_dirtys;
         private List<Cell> m_obstacles;
         private Graphics m_grs;
-        int i = 0;
         private SolidBrush m_color;
+        private int totaFrame;
+
+        private Thread thread1, thread2;
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -48,7 +50,20 @@ namespace Robo.BL
             m_dirtys = new List<Cell>();
             m_obstacles = new List<Cell>();
             // m_grs = m_com.GetGraphics();
-            new Thread(new ThreadStart(ScanMap)).Start();
+            thread1 = new Thread(new ThreadStart(ScanMap));
+            thread2 = new Thread(new ThreadStart(OnDrawDirty));
+            thread1.Start();
+            thread2.Start();
+        }
+
+        public void OnExit()
+        {
+            foreach (var item in m_listRobo)
+            {
+                item.OnExit();
+            }
+            thread1.Abort();
+            thread2.Abort();
         }
 
         public void SetEnviroment(int w, int h, Color color, Graphics grs)
@@ -59,6 +74,10 @@ namespace Robo.BL
             m_color = new SolidBrush(color);
         }
 
+        private void OnDrawDirty()
+        {
+            
+        }
 
         private void SetupMatrix()
         {
@@ -74,10 +93,8 @@ namespace Robo.BL
 
         public void AddRobot(RoboCleanHouse rb)
         {
-            rb.Tag = i;
-            i++;
+            rb.Tag = m_listRobo.Count;
             m_listRobo.Add(rb);
-            // new Thread(new ThreadStart(rb.Operate)).Start();
         }
 
         public List<RoboCleanHouse> GetListRobo()
@@ -90,23 +107,23 @@ namespace Robo.BL
             m_listRobo.Clear();
         }
 
-        public void CleanDirty(int x, int y)
-        {
-            int tag = -1;
-            foreach (var item in m_dirtys)
-            {
-                if (item.X == x && item.Y == y)
-                {
-                    tag = item.RoboCleaning;
-                    m_dirtys.Remove(item);
-                    break;
-                }
-            }
-            if (tag != -1)
-            {
-                StopRobo(tag);
-            }
-        }
+        //public void CleanDirty(int x, int y)
+        //{
+        //    int tag = -1;
+        //    foreach (var item in m_dirtys)
+        //    {
+        //        if (item.X == x && item.Y == y)
+        //        {
+        //            tag = item.RoboCleaning;
+        //            m_dirtys.Remove(item);
+        //            break;
+        //        }
+        //    }
+        //    if (tag != -1)
+        //    {
+        //        StopRobo(tag);
+        //    }
+        //}
 
         private void StopRobo(int tag)
         {
@@ -114,10 +131,23 @@ namespace Robo.BL
 
         }
 
-        public void CleanDirty(int Tag)
+        //public void CleanDirty(int Tag)
+        //{
+        //    var dir = m_dirtys[Tag];
+        //    m_dirtys.Remove(dir);
+        //}
+
+        internal bool isVisible(int tag)
         {
-            var dir = m_dirtys[Tag];
-            m_dirtys.Remove(dir);
+            for (int i = 0; i < m_dirtys.Count; i++)
+            {
+                var dir = m_dirtys[i];
+                if (dir.Tag == tag)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public Cell[,] MappingMap(Cell[,] cell, int roboX, int roboY)
@@ -148,7 +178,16 @@ namespace Robo.BL
 
         internal void RejectDirty(Cell cell)
         {
-            m_dirtys.Remove(cell);
+          //  m_dirtys.Remove(cell);
+        }
+
+        public void RePaintObject()
+        {
+            for (int i = 0; i < m_dirtys.Count; i++)
+            {
+                var dir = m_dirtys[i];
+                DrawDirty(dir.P);
+            }
         }
 
         private Cell[,] MappingMapDirty(Cell[,] cell)
@@ -185,6 +224,7 @@ namespace Robo.BL
                     m_com.DrawDirty(p);
                     cell.HasRoboCleaning = false;
                     cell.RoboCleaning = -1;
+                    cell.Tag = m_dirtys.Count;
                     m_dirtys.Add(cell);
 
                     // CallRoboClean();
@@ -231,26 +271,86 @@ namespace Robo.BL
 
         private void CallRoboClean()
         {
-           // Console.WriteLine("Clean : has dirtys: " + m_dirtys.Count);
+            Console.WriteLine("Clean : has dirtys: " + m_dirtys.Count);
+            for (int i = 0; i < m_listRobo.Count; i++)
+            {
+                var robo = m_listRobo[i];
+                if (!robo.IsBusy() && robo.GetDirty() == null)
+                {
+                    var dir = CheckNearDirty(robo);
+                    if (dir != null)
+                    {
+                        var _robo = CheckNearRobo(dir);
+                        if (_robo != null && _robo == robo)
+                        {
+                            dir.HasRoboCleaning = true;
+                            dir.RoboCleaning = robo.Tag;
+                            robo.SetDirty(dir);
+                        }
+                        else if (_robo != null)
+                        {
+                            dir.HasRoboCleaning = true;
+                            dir.RoboCleaning = _robo.Tag;
+                            _robo.SetDirty(dir);
+                        }
+                        Thread.Sleep(100);
+                    }
+                    //break;
+                }
+            }
+        }
+
+        private RoboCleanHouse CheckNearRobo(Cell dir)
+        {
+            double _tempDistance = 10000;
+            RoboCleanHouse _tem = null;
+            for (int i = 0; i < m_listRobo.Count; i++)
+            {
+                var robo = m_listRobo[i];
+                if (!robo.IsBusy())
+                {
+                    var distance = DistanceTwoNodes(dir.X, dir.Y, robo.GetX(), robo.GetY());
+                    if (distance < _tempDistance)
+                    {
+                        _tem = robo;
+                        _tempDistance = distance;
+                    }
+                }
+            }
+            return _tem;
+        }
+
+        private Cell CheckNearDirty(RoboCleanHouse robo)
+        {
+            double _tempDistance = 10000;
+            Cell _celTem = null;
             for (int i = 0; i < m_dirtys.Count; i++)
             {
                 var dir = m_dirtys[i];
                 if (!dir.HasRoboCleaning)
                 {
-                    for (int j = 0; j < m_listRobo.Count; j++)
+                    var distance = DistanceTwoNodes(dir.X, dir.Y, robo.GetX(), robo.GetY());
+                    if (distance < _tempDistance)
                     {
-                        var robo = m_listRobo[j];
-                        if (!robo.IsBusy())
-                        {
-                            dir.HasRoboCleaning = true;
-                            dir.RoboCleaning = robo.Tag;
-                            robo.SetDirty(dir);
-                            break;
-                        }
+                        _celTem = dir;
+                        _tempDistance = distance;
                     }
-                    break;
+                }
+                else
+                {
+                    //var _robo = m_listRobo[dir.RoboCleaning];
+                    //if (_robo.GetDirty()==null)
+                    //{
+                    //    return dir;
+                    //}
                 }
             }
+            return _celTem;
+        }
+
+        private double DistanceTwoNodes(int x1, int y1, int x2, int y2)
+        {
+            return Math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
         }
 
         public bool IsNonCollision(int x, int y, int tag)
@@ -262,6 +362,7 @@ namespace Robo.BL
                     && robo.GetY() == y
                     )
                 {
+                    m_listRobo[tag].AddException(new Cell(x, y, new Point()));
                     return false;
                 }
             }
@@ -298,7 +399,6 @@ namespace Robo.BL
         public void DeleteIcon(Point p)
         {
             m_grs.FillRectangle(m_color, p.X + 1, p.Y + 1, Width - 1, Height - 1);
-
         }
 
         public void DrawDirty(Point p)
@@ -323,30 +423,50 @@ namespace Robo.BL
             {
                 CallRoboClean();
                 OnUpdate();
-              //  OnRender();
-                Thread.Sleep(300);
+                //  OnRender();
+                Thread.Sleep(100);
             }
         }
 
         private void OnUpdate()
         {
-            int total = 0;
+            int totalRoboNonBusy = 0;
+            CheckCollision();
             for (int i = 0; i < m_listRobo.Count; i++)
             {
                 var robo = m_listRobo[i];
-                if (!robo.IsBusy())
+                if (robo.GetDirty() == null)
                 {
-                    total++;
-                    //return;
+                    robo.StopClean();
+                    totalRoboNonBusy++;
                 }
             }
-            if (total == m_listRobo.Count)
+            if (totalRoboNonBusy == m_listRobo.Count)
             {
                 for (int i = 0; i < m_dirtys.Count; i++)
                 {
                     var dir = m_dirtys[i];
                     dir.HasRoboCleaning = false;
                     dir.RoboCleaning = -1;
+                }
+            }
+        }
+
+        private void CheckCollision()
+        {
+            for (int i = 0; i < m_dirtys.Count; i++)
+            {
+                var dir = m_dirtys[i];
+                for (int j = 0; j < m_listRobo.Count; j++)
+                {
+                    var robo = m_listRobo[j];
+                    if (dir.X == robo.GetX() && dir.Y == robo.GetY())
+                    {
+                        robo.CleanSuccess();
+                        DeleteIcon(dir.P);
+                        m_dirtys.Remove(dir);
+                        break;
+                    }
                 }
             }
 

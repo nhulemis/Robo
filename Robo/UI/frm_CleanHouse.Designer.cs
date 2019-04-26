@@ -159,6 +159,7 @@
             this.MaximizeBox = false;
             this.Name = "frm_CleanHouse";
             this.Text = "frm_CleanHouse";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frm_CleanHouse_FormClosing);
             this.Load += new System.EventHandler(this.frm_CleanHouse_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

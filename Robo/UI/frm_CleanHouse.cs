@@ -99,5 +99,10 @@ namespace Robo.UI
             }
             bl.OnResume();
         }
+
+        private void frm_CleanHouse_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            bl.OnExit();
+        }
     }
 }

@@ -18,10 +18,9 @@ namespace Robo.src
         private int m_y;
         private Point m_position;
         private Image m_imgRobot;
-        //private   Thread m_thread;
         private Stack<Cell> m_pathPlanning;
         private Queue<Cell> m_Open;
-        private Queue<Cell> m_dirtys;
+        private Cell m_dirtys;
         //private Queue<Cell> m_subDirtys;
         public int Tag { get; set; }
         private Cell[,] m_map;
@@ -35,13 +34,17 @@ namespace Robo.src
         private bool m_isStop;
         private int m_coutTimesFoundPath;
         private Thread m_thread;
+        string path = Application.StartupPath + "\\Resources\\robo.png";
+        private static Color m_color;
+        private static Graphics m_grs;
+        private static Brush m_soliColor;
+        private List<Cell> m_exception;
 
-        private Color m_color;
-        private Graphics m_grs;
-        private Brush m_soliColor;
-
-
-
+        public void OnExit()
+        {
+            Console.WriteLine("Robo :" + Tag + " exit");
+            m_thread.Abort();
+        }
 
         //--------------------------------------------------------------
         public RoboCleanHouse()
@@ -58,7 +61,7 @@ namespace Robo.src
             m_position.X = m_x * m_com.Width;
             m_position.Y = m_y * m_com.Height;
             m_isModified = false;
-            string path = Application.StartupPath + "\\Resources\\robo.png";
+
             WebRequest req = WebRequest.Create(path);
             WebResponse res = req.GetResponse();
             Stream imgStream = res.GetResponseStream();
@@ -73,13 +76,14 @@ namespace Robo.src
             m_pathPlanning = new Stack<Cell>();
             OnInit();
             m_thread.Start();
+
         }
 
         //---------------------------------------------------------------
         private void OnUpdate()
         {
-            Console.WriteLine("Robo :" + Tag + " has dirtys: " + m_dirtys.Count);
-            if (m_dirtys.Count != 0)
+            // Console.WriteLine("Robo :" + Tag + " has dirtys: " + m_dirtys.Count);
+            if (m_dirtys != null)
             {
                 m_totalTimes++;
                 if (!m_isBusy)
@@ -93,37 +97,40 @@ namespace Robo.src
                 {
                     if (m_totalTimes % m_timesSwap == 0)
                     {
-                        Swap();
+                        if (BL.bl_CleanHouse.GetInstance().isVisible(m_dirtys.Tag))
+                        {
+                            Swap();
+                        }
+                        else
+                        {
+                            StopClean();
+                        }
                     }
                 }
             }
-
             // Console.WriteLine("Robo : " + Tag + " has dirtys: " + m_dirtys.Count);
         }
 
         private void RescanMap()
         {
-            // m_com.DrawMatrix();
-            // m_grs.DrawImage(m_imgRobot, m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
             SetupMatrix();
             MappingMap();
             m_map[m_x, m_y].Cost = 0;
-            // m_isBusy = false;
         }
 
         private void SchedulePathPlanning()
         {
-            if (m_dirtys.Count == 0)
+            if (m_dirtys == null)
             {
                 return;
             }
-            var tem = m_dirtys.Peek();
+            var tem = m_dirtys;
             while (true)
             {
                 m_coutTimesFoundPath++;
                 if (m_coutTimesFoundPath > m_com.COLUMNS * m_com.ROWS)
                 {
-                    BL.bl_CleanHouse.GetInstance().RejectDirty(m_dirtys.Peek());
+                    BL.bl_CleanHouse.GetInstance().RejectDirty(m_dirtys);
                     StopClean();
                     m_coutTimesFoundPath = 0;
                     return;
@@ -155,7 +162,6 @@ namespace Robo.src
 
         private void Spill()
         {
-
             RescanMap();
             m_Open.Enqueue(m_map[m_x, m_y]);
 
@@ -177,9 +183,13 @@ namespace Robo.src
                         m_Open.Enqueue(e);
                         //DrawValue(e.P, values + 1);
 
-                        if (m_map[X, Y].Kind == Constants.DIRTY)
+                        //if (m_map[X, Y].Kind == Constants.DIRTY)
+                        //{
+                        //    m_dirtys = m_map[X, Y];
+                        //    break;
+                        //}
+                        if (X == m_dirtys.X && Y == m_dirtys.Y)
                         {
-                            m_dirtys.Enqueue(m_map[X, Y]);
                             break;
                         }
                     }
@@ -195,10 +205,7 @@ namespace Robo.src
             {
                 return false;
             }
-            if (m_map[x, y].Cost != -1 && type == 0)
-            {
-                return false;
-            }
+
             if (m_map[x, y].Cost == -100 || m_map[x, y].Kind == Constants.VAT_CAN)
             {
                 return false;
@@ -207,18 +214,33 @@ namespace Robo.src
             {
                 return false;
             }
+            if (type == 0)
+            {
+                for (int i = 0; i < m_exception.Count; i++)
+                {
+                    var ex = m_exception[i];
+                    if (ex.X == x && ex.Y == y)
+                    {
+                        return false;
+                    }
+                }
+
+                if (m_map[x, y].Cost != -1)
+                {
+                    return false;
+                }
+            }
             return true;
         }
 
         public void Swap()
         {
-            if (m_dirtys.Count == 0)
+            if (m_dirtys == null)
             {
                 return;
             }
 
-            var dirty = m_dirtys.Peek();
-            if (dirty.X == m_x && dirty.Y == m_y)
+            if (m_dirtys.X == m_x && m_dirtys.Y == m_y)
             {
                 StopClean();
                 return;
@@ -228,20 +250,72 @@ namespace Robo.src
             {
                 return;
             }
+
             var next = m_pathPlanning.Pop();
             if (!BL.bl_CleanHouse.GetInstance().IsNonCollision(next.X, next.Y, Tag))
             {
-                BL.bl_CleanHouse.GetInstance().ReScanDirty(m_dirtys.Peek());
-                Thread.Sleep(500);
+
+                Thread.Sleep(100);
+                //if (!BL.bl_CleanHouse.GetInstance().IsNonCollision(next.X, next.Y, Tag))
+                //{
+                //    RescanMap();
+                //    Spill();
+                //    m_pathPlanning.Clear();
+                //    SchedulePathPlanning();
+                //    return;
+                //}
+                BL.bl_CleanHouse.GetInstance().ReScanDirty(m_dirtys);
                 StopClean();
                 return;
             }
-            m_grs.FillRectangle(m_soliColor, m_position.X + 1, m_position.Y + 1, m_Witdh - 1, m_Height - 1);
+
+            try
+            {
+                m_grs.FillRectangle(m_soliColor, m_position.X + 1, m_position.Y + 1, m_Witdh - 1, m_Height - 1);
+            }
+            catch (Exception)
+            {
+                RepaintObject();
+            }
+
             m_position = next.P;
             m_x = next.X;
             m_y = next.Y;
-            BL.bl_CleanHouse.GetInstance().CleanDirty(m_x, m_y);
             m_isModified = true;
+            // BL.bl_CleanHouse.GetInstance().CleanDirty(m_x, m_y);
+            //CleanSuccess();
+        }
+
+        public Cell GetDirty()
+        {
+            return m_dirtys;
+        }
+
+        public void AddException(Cell c)
+        {
+            m_exception.Add(c);
+        }
+
+        public void CleanSuccess()
+        {
+            m_isModified = true;
+            try
+            {
+                m_grs.FillRectangle(m_soliColor, m_position.X + 1, m_position.Y + 1, m_Witdh - 1, m_Height - 1);
+            }
+            catch (Exception)
+            {
+                RepaintObject();
+            }
+        }
+
+        private void RepaintObject()
+        {
+            //m_com.DrawMatrix();
+            //BL.bl_CleanHouse.GetInstance().RePaintObject();
+
+            m_com.DeleteIcon(m_position);
+
         }
 
         private void DrawValue(Point p, int val)
@@ -268,7 +342,8 @@ namespace Robo.src
         {
             m_map = new Cell[m_com.COLUMNS, m_com.ROWS];
             m_Open = new Queue<Cell>();
-            m_dirtys = new Queue<Cell>();
+            m_exception = new List<Cell>();
+            m_dirtys = null;
             SetupMatrix();
             //m_isModified = true;
             m_map[m_x, m_y].Cost = 0;
@@ -283,9 +358,21 @@ namespace Robo.src
         {
             if (m_isModified)
             {
-                grs.DrawImage(m_imgRobot, m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
-                //  DrawValue(m_position, Tag + 1);
-                m_isModified = false;
+                try
+                {
+                    grs.DrawImage(m_imgRobot, m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
+                    //  DrawValue(m_position, Tag + 1);
+                    m_isModified = false;
+                }
+                catch (Exception)
+                {
+                    //  grs.DrawImage(m_imgRobot, m_position.X + 1, m_position.Y + 1, m_com.Width - 1, m_com.Height - 1);
+                    RepaintObject();
+                    //m_com.RenderIcon(path, m_position);
+                    m_isModified = true;
+                }
+                                   
+
             }
 
         }
@@ -301,7 +388,7 @@ namespace Robo.src
 
         public void StopClean()
         {
-            m_dirtys.Clear();
+            m_dirtys = null;
             m_isBusy = false;
         }
 
@@ -338,7 +425,7 @@ namespace Robo.src
 
         public void SetDirty(Cell dir)
         {
-            m_dirtys.Enqueue(dir);
+            m_dirtys = dir;
             m_totalTimes = 0;
         }
 
