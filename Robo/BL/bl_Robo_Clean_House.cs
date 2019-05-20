@@ -104,6 +104,8 @@ namespace Robo.BL
 
         public void ResizeMap()
         {
+            m_dirtys.Clear();
+            m_obstacles.Clear();
             m_listRobo.Clear();
         }
 

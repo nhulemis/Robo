@@ -199,5 +199,10 @@ namespace Robo.UI
         {
 
         }
+
+        private void frm_Robo_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            
+        }
     }
 }

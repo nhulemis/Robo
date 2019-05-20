@@ -42,8 +42,8 @@
             this.timer1_LauDon = new System.Windows.Forms.Timer(this.components);
             this.timer2_LauDon = new System.Windows.Forms.Timer(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
+            this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -166,18 +166,6 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "thời gian lau dọn";
             // 
-            // radioButton2
-            // 
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(20, 24);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(142, 24);
-            this.radioButton2.TabIndex = 0;
-            this.radioButton2.TabStop = true;
-            this.radioButton2.Text = "Quét (2500ms)";
-            this.radioButton2.UseVisualStyleBackColor = true;
-            this.radioButton2.Click += new System.EventHandler(this.radioButton2_Click);
-            // 
             // radioButton3
             // 
             this.radioButton3.AutoSize = true;
@@ -189,6 +177,18 @@
             this.radioButton3.Text = "Lau Kỹ(5000ms)";
             this.radioButton3.UseVisualStyleBackColor = true;
             this.radioButton3.Click += new System.EventHandler(this.radioButton3_Click);
+            // 
+            // radioButton2
+            // 
+            this.radioButton2.AutoSize = true;
+            this.radioButton2.Location = new System.Drawing.Point(20, 24);
+            this.radioButton2.Name = "radioButton2";
+            this.radioButton2.Size = new System.Drawing.Size(142, 24);
+            this.radioButton2.TabIndex = 0;
+            this.radioButton2.TabStop = true;
+            this.radioButton2.Text = "Quét (2500ms)";
+            this.radioButton2.UseVisualStyleBackColor = true;
+            this.radioButton2.Click += new System.EventHandler(this.radioButton2_Click);
             // 
             // frm_Robo
             // 
@@ -202,6 +202,7 @@
             this.Controls.Add(this.pnlMatBang);
             this.Name = "frm_Robo";
             this.Text = "frm_Robo";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frm_Robo_FormClosed);
             this.Load += new System.EventHandler(this.frm_Robo_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

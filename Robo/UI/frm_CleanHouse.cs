@@ -3,15 +3,16 @@ using System.Threading;
 using System.Windows.Forms;
 using Robo.BL;
 using Robo.src;
+using Robo.UI;
 
 namespace Robo.UI
 {
 
 
-    public partial class frm_CleanHouse : Form
+    public partial class frm_CleanHouse : Form 
     {
         private bl_CleanHouse bl;
-
+        private static frm_CleanHouse s_instance;
 
         public frm_CleanHouse()
         {
@@ -103,6 +104,21 @@ namespace Robo.UI
         private void frm_CleanHouse_FormClosing(object sender, FormClosingEventArgs e)
         {
             bl.OnExit();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            frm_Robo robo = new frm_Robo();
+            robo.Show();
+            bl.OnExit();
+            //this.Hide();
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+            frm_Robo robo = new frm_Robo();
+            robo.Show();
+           // bl.OnExit();
         }
     }
 }
